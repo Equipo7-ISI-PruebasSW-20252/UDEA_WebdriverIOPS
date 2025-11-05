@@ -24,5 +24,5 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
     // valid username or password
     await expect($('.title')).toBeExisting();
     await expect($('.title')).toHaveTextContaining(message);
-  }
+  } 
 });

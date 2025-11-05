@@ -1,6 +1,6 @@
 import Page from "./page.js";
 
-class CheckStatePage extends Page {
+class StateCheckPage extends Page {
   // selector para listado de cuentas (ajusta según DOM real)
   get accountsList() {
     return $$("//div[@id='accountTable']//a"); // devuelve array de elementos <a> con números de cuenta
@@ -56,4 +56,4 @@ class CheckStatePage extends Page {
   }
 }
 
-export default new CheckStatePage();
+export default new StateCheckPage();

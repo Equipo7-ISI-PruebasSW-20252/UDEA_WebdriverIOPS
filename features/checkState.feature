@@ -1,8 +1,7 @@
 Feature: ParaBank Check State Feature
 
   Background:
-    Given I am on the login page
-    When I login with john and demo
+    Given I am logged in with john and demo
 
   Scenario: All accounts are displayed for the user
     Given I am on the checkState page

@@ -32,25 +32,25 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 //CHECK ACCOUNT STATE
 // Ver que la lista de cuentas aparece
 Then(/^I should see the accounts list displayed$/, async () => {
-  await expect(CheckStatePage.accountsList.length).toBeGreaterThan(0);
+  await expect(StateCheckPage.accountsList.length).toBeGreaterThan(0);
   // o más robusto:
-  await expect(CheckStatePage.accountsList[0]).toBeExisting();
+  await expect(StateCheckPage.accountsList[0]).toBeExisting();
 });
 
 Then(/^the accounts list should contain at least (\d+) account$/, async (minCount) => {
-  const list = await CheckStatePage.accountsList;
+  const list = await StateCheckPage.accountsList;
   await expect(list.length).toBeGreaterThanOrEqual(parseInt(minCount, 10));
 });
 
 // Click parametrizado
 When(/^I click on account "([^"]+)"$/, async (accountId) => {
-  await CheckStatePage.selectAccount(accountId);
+  await StateCheckPage.selectAccount(accountId);
 });
 
 // Ver detalles con parsing de balance
 Then(/^I should see the details panel showing account id "([^"]+)", type "([^"]+)" and balance "([^"]+)"$/, 
   async (accountId, accountType, expectedBalanceText) => {
-    const details = await CheckStatePage.getAccountDetails();
+    const details = await StateCheckPage.getAccountDetails();
     await expect(details.title).toContain('Account Details'); // o el texto apropiado
     await expect(details.accountId).toContain(accountId);
     await expect(details.accountType).toContain(accountType);
@@ -66,13 +66,13 @@ Then(/^I should see the details panel showing account id "([^"]+)", type "([^"]+
 let lastRecordedBalance = null;
 
 When(/^I record the balance shown as "([^"]+)"$/, async (alias) => {
-  const details = await CheckStatePage.getAccountDetails();
+  const details = await StateCheckPage.getAccountDetails();
   // guardo en variable global definida arriba (simple)
   lastRecordedBalance = details.balance;
 });
 
 Then(/^the previously recorded balance "([^"]+)" should not equal the current balance$/, async (alias) => {
-  const details = await CheckStatePage.getAccountDetails();
+  const details = await StateCheckPage.getAccountDetails();
   if (!lastRecordedBalance) throw new Error('No balance recorded previously');
   await expect(details.balance).not.toEqual(lastRecordedBalance);
 });

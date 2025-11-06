@@ -1,11 +1,9 @@
 Feature: ParaBank Check State Feature
 
   Scenario: All accounts are displayed for the user
-    Given I am logged in with john and demo
-    And I am on the checkState page
+    Given I am on the checkState page
     Then I should see the accounts list displayed
     And the accounts list should contain at least 1 account
-    And I print all available accounts
 
   #Scenario Outline: User can view account details by clicking an account
    # Given I am logged in with john and demo

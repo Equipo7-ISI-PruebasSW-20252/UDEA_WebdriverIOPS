@@ -48,8 +48,10 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 //*********************************************************************************************************************************************************
 
 // CHECK ACCOUNT STATE
+// Ver que la lista de cuentas aparece
 Then(/^I should see the accounts list displayed$/, async () => {
-  await CheckStatePage.waitForAccountsTable();
+  // Esperar a que exista al menos un elemento
+  await browser.pause(1000); // Pequeña pausa para estabilizar
   const list = await CheckStatePage.accountsList;
   await expect(list.length).toBeGreaterThan(0);
 });

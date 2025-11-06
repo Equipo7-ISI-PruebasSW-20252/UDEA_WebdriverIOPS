@@ -11,6 +11,10 @@ class CheckStatePage extends Page {
     return $$("table#accountTable tbody tr");
   }
 
+  accountLink(accountId) {
+    return $(`//a[normalize-space()="${accountId}"]`);
+  }
+
   // título de la página
   get pageTitle() {
     return $("h1.title");
@@ -65,6 +69,15 @@ class CheckStatePage extends Page {
     console.log('Accounts list is displayed successfully');
   }
 
+  async selectAccount(account) {
+    const accountEl = this.accountLink(account);
+    await accountEl.waitForExist({ timeout: 5000 });
+    await accountEl.waitForClickable({ timeout: 5000 });
+    await accountEl.click();
+    // esperar a que el panel de detalles se actualice
+    await this.detailsTitle.waitForDisplayed({ timeout: 5000 });
+  }
+
   // Método para obtener información de cuentas
   async getAllAccountsInfo() {
     await this.waitForAccountsTable();
@@ -95,16 +108,7 @@ class CheckStatePage extends Page {
     
     return accounts;
   }
-
-  async selectAccount(account) {
-    const accountEl = this.accountLink(account);
-    await accountEl.waitForExist({ timeout: 5000 });
-    await accountEl.waitForClickable({ timeout: 5000 });
-    await accountEl.click();
-    // esperar a que el panel de detalles se actualice
-    await this.detailsTitle.waitForDisplayed({ timeout: 5000 });
-  }
-
+  
   // OVERRIDE del método open
   async open() {
     console.log('Opening accounts overview page...');

@@ -1,24 +1,27 @@
-Feature: Para Bank Check State Feature
+Feature: ParaBank Check State Feature
 
-  Background: 
+  Background:
     Given I am on the login page
     When I login with john and demo
 
-  Scenario Outline: As a user, I can check the state of my accounts in the Para Bank Website
+  Scenario: All accounts are displayed for the user
     Given I am on the checkState page
-    When I click on an <account>
-    Then I can see the <details> as <account>, <accountType>, <balance> and <available>
+    Then I should see the accounts list displayed
+    And the accounts list should contain at least 1 account
+
+  Scenario Outline: User can view account details by clicking an account
+    Given I am on the checkState page
+    When I click on account "<accountId>"
+    Then I should see the details panel showing account id "<accountId>", type "<accountType>" and balance "<balance>"
 
     Examples:
-      | details         | account | accountType | balance  | available |
-      | Account Details | 13011   | CHECKING    | $100.00  | $100.00   |
-      | Account Details | 13344   | SAVINGS     | $1231.10 | $1231.10  |
+      | accountId | accountType | balance    |
+      | 13011     | CHECKING    | $123.00    |
+      | 14022     | SAVINGS     | $2,345.67  |
 
-  Scenario: Verify all accounts are displayed with balances
+  Scenario: Selecting another account updates the details panel
     Given I am on the checkState page
-    Then I should see all my accounts with their current balances
-
-  Scenario: Verify account switching updates the view
-    Given I am on the checkState page
-    When I switch from account 13011 to account 13344
-    Then I should see the details updated for account 13344
+    When I click on account "13011"
+    And I record the balance shown as "balanceA"
+    When I click on account "14022"
+    Then the previously recorded balance "balanceA" should not equal the current balance

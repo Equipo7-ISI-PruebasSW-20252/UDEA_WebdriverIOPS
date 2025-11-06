@@ -47,17 +47,15 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 
 //*********************************************************************************************************************************************************
 
-// CHECK ACCOUNT STATE
-// Ver que la lista de cuentas aparece
+// CHECK ACCOUNT STATE - ACTUALIZADO
 Then(/^I should see the accounts list displayed$/, async () => {
-  // Esperar a que exista al menos un elemento
-  await browser.pause(1000); // Pequeña pausa para estabilizar
-  const list = await CheckStatePage.accountsList;
+  await CheckStatePage.waitForAccountsTable();
+  const list = await CheckStatePage.accountLinks;
   await expect(list.length).toBeGreaterThan(0);
 });
 
 Then(/^the accounts list should contain at least (\d+) account$/, async (minCount) => {
-  const list = await CheckStatePage.accountsList;
+  const list = await CheckStatePage.accountLinks;
   await expect(list.length).toBeGreaterThanOrEqual(parseInt(minCount, 10));
 });
 
@@ -77,7 +75,9 @@ Then(/^I should see the details panel showing account id "([^"]+)", type "([^"]+
     const normalize = txt => txt.replace(/[^0-9.-]+/g, '');
     const actual = parseFloat(normalize(details.balance));
     const expected = parseFloat(normalize(expectedBalanceText));
-    await expect(actual).toEqual(expected);
+    
+    // Usar toBeCloseTo para comparaciones de punto flotante
+    await expect(actual).toBeCloseTo(expected, 2);
 });
 
 When(/^I record the balance shown as "([^"]+)"$/, async (alias) => {
@@ -89,6 +89,12 @@ Then(/^the previously recorded balance "([^"]+)" should not equal the current ba
   const details = await CheckStatePage.getAccountDetails();
   if (!this.recordedBalance) throw new Error('No balance recorded previously');
   await expect(details.balance).not.toEqual(this.recordedBalance);
+});
+
+// Step para debugging - ver todas las cuentas disponibles
+Then(/^I print all available accounts$/, async () => {
+  const accounts = await CheckStatePage.getAllAccountsInfo();
+  console.log('Available accounts:', accounts);
 });
 
 //*********************************************************************************************************************************************************

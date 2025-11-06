@@ -1,9 +1,14 @@
 import Page from "./page.js";
 
 class CheckStatePage extends Page {
-  // selector para listado de cuentas (ajusta según DOM real)
+  // selector para la tabla de cuentas
+  get accountsTable() {
+    return $("#accountTable");
+  }
+
+  // selector para listado de cuentas
   get accountsList() {
-    return $$("//div[@id='accountTable']//a"); // devuelve array de elementos <a> con números de cuenta
+    return $$("#accountTable tbody tr a");
   }
 
   accountLink(accountId) {
@@ -29,6 +34,12 @@ class CheckStatePage extends Page {
 
   get detailAvailable() {
     return $("//td[@id='availableBalance']");
+  }
+
+  // NUEVO MÉTODO: Esperar a que la tabla de cuentas esté disponible
+  async waitForAccountsTable() {
+    await this.accountsTable.waitForExist({ timeout: 10000 });
+    await this.accountsTable.waitForDisplayed({ timeout: 10000 });
   }
 
   async selectAccount(account) {

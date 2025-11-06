@@ -10,9 +10,9 @@ Feature: Para Bank Check State Feature
     Then I can see the <details> as <account>, <accountType>, <balance> and <available>
 
     Examples:
-      |        details        |     balance     |   account   |   accountType   |   available   |
-      |     Account Details   |     $100.00     |    13011    |    CHECKING     |     $100.00   |
-      |     Account Details   |     $1231.10    |    13344    |    SAVINGS      |     $1231.10  |
+      | details         | account | accountType | balance  | available |
+      | Account Details | 13011   | CHECKING    | $100.00  | $100.00   |
+      | Account Details | 13344   | SAVINGS     | $1231.10 | $1231.10  |
 
   Scenario: Verify all accounts are displayed with balances
     Given I am on the checkState page

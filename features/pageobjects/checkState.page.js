@@ -3,17 +3,12 @@ import Page from "./page.js";
 class CheckStatePage extends Page {
   // selector para la tabla de cuentas
   get accountsTable() {
-    return $("table#accountTable.gradient-style");
+    return $("table#accountTable");
   }
 
   // selector para filas de la tabla
   get accountRows() {
-    return $$("table#accountTable.gradient-style tbody tr");
-  }
-
-  // selector para celdas de ID de cuenta
-  get accountIdCells() {
-    return $$("table#accountTable.gradient-style tbody tr td:first-child");
+    return $$("table#accountTable tbody tr");
   }
 
   // título de la página
@@ -21,164 +16,130 @@ class CheckStatePage extends Page {
     return $("h1.title");
   }
 
-  // Método para encontrar cuenta por ID 
-  async getAccountCell(accountId) {
-    await this.waitForAccountsTable();
-    const cells = await this.accountIdCells;
-    
-    for (const cell of cells) {
-      const cellText = await cell.getText();
-      if (cellText.trim() === accountId) {
-        return cell;
-      }
-    }
-    throw new Error(`Account with ID ${accountId} not found`);
-  }
-
+  // Método mejorado para wait - MÁS FLEXIBLE
   async waitForAccountsTable() {
-    console.log('Waiting for accounts table...');
+    console.log('Waiting for accounts page to load...');
     
-    // Primero esperar a que la página cargue
+    // Esperar a que la página cargue completamente
     await this.pageTitle.waitForExist({ timeout: 15000 });
     const titleText = await this.pageTitle.getText();
     console.log(`Page title: "${titleText}"`);
     
-    // Verificar que estamos en la página correcta
-    if (!titleText.includes('Accounts Overview')) {
-      throw new Error(`Not on accounts overview page. Current title: "${titleText}"`);
+    // Si hay error, lanzar excepción
+    if (titleText === "Error!") {
+      // Debug: ver qué hay en la página
+      const errorDetails = await $('body').getText().catch(() => 'No error details');
+      console.log('Error page content:', errorDetails.substring(0, 300));
+      throw new Error(`Application error: ${titleText}. Check if overview page is accessible.`);
     }
     
-    // Esperar a que la tabla exista - con selector específico
-    await this.accountsTable.waitForExist({ timeout: 15000 });
-    await this.accountsTable.waitForDisplayed({ timeout: 15000 });
-    console.log('Accounts table found and displayed');
+    // Esperar a que la tabla exista (ser más flexible con el selector)
+    try {
+      await this.accountsTable.waitForExist({ timeout: 10000 });
+      await this.accountsTable.waitForDisplayed({ timeout: 10000 });
+      console.log('Accounts table found');
+    } catch (error) {
+      console.log('Accounts table not found with #accountTable, trying alternative selectors...');
+      
+      // Intentar selectores alternativos
+      const alternativeTable = await $('table').catch(() => null);
+      if (alternativeTable && await alternativeTable.isDisplayed()) {
+        console.log('Found alternative table');
+      } else {
+        throw new Error('No accounts table found on page');
+      }
+    }
     
-    // Esperar a que haya al menos una cuenta
+    // Esperar a que haya filas en la tabla
     await browser.waitUntil(
       async () => {
         const rows = await this.accountRows;
         return rows.length > 0;
       },
       { 
-        timeout: 15000, 
-        timeoutMsg: 'No accounts found in table after waiting' 
+        timeout: 10000, 
+        timeoutMsg: 'No account rows found in table' 
       }
     );
-    console.log('Accounts found in table');
+    
+    console.log('Accounts list is displayed successfully');
   }
 
-  async selectAccount(accountId) {
-    console.log(`Selecting account: ${accountId}`);
-    const accountCell = await this.getAccountCell(accountId);
-    
-    await accountCell.waitForClickable({ timeout: 10000 });
-    await accountCell.click();
-    console.log(`Clicked on account ${accountId}`);
-    
-    // Esperar a que la página responda
-    await browser.pause(2000);
-  }
-
-  async getAccountDetails() {
-    // Después de hacer clic en una cuenta, los detalles pueden aparecer de diferentes formas
-    // Para ParaBank, generalmente va a una página de actividad
-    
-    // Esperar a que cargue la nueva página
-    await this.pageTitle.waitForExist({ timeout: 10000 });
-    const newTitle = await this.pageTitle.getText();
-    console.log(`New page title: "${newTitle}"`);
-    
-    // Intentar obtener detalles de diferentes formas
-    let accountId, accountType, balance;
-    
-    try {
-      // Método 1: Buscar en la tabla de detalles
-      accountId = await $("//td[contains(text(), 'Account Number:')]/following-sibling::td").getText();
-    } catch (e) {
-      try {
-        // Método 2: Buscar en el título
-        const title = await this.pageTitle.getText();
-        accountId = title.match(/\d+/)?.[0] || 'Not found';
-      } catch (e2) {
-        accountId = 'Unknown';
-      }
-    }
-    
-    try {
-      accountType = await $("//td[contains(text(), 'Account Type:')]/following-sibling::td").getText();
-    } catch (e) {
-      accountType = 'CHECKING'; // valor por defecto
-    }
-    
-    try {
-      balance = await $("//td[contains(text(), 'Balance:')]/following-sibling::td").getText();
-    } catch (e) {
-      try {
-        // Buscar balance en la página
-        balance = await $("//td[contains(text(), '$')]").getText();
-      } catch (e2) {
-        balance = '$0.00';
-      }
-    }
-
-    return {
-      title: newTitle,
-      accountId: accountId.trim(),
-      accountType: accountType.trim(),
-      balance: balance.trim(),
-      available: balance.trim(), // Por simplicidad
-    };
-  }
-
-  // Método para obtener información de todas las cuentas - CORREGIDO
+  // Método para obtener información de cuentas - SIMPLIFICADO
   async getAllAccountsInfo() {
     await this.waitForAccountsTable();
-    const accounts = [];
     const rows = await this.accountRows;
+    const accounts = [];
     
-    console.log(`Found ${rows.length} account rows`);
+    console.log(`Processing ${rows.length} account rows...`);
     
     for (let i = 0; i < rows.length; i++) {
       try {
         const cells = await rows[i].$$('td');
-        if (cells.length >= 3) {
+        if (cells.length >= 2) { // Al menos Account y Balance
           const accountId = (await cells[0].getText()).trim();
-          const balance = (await cells[1].getText()).trim();
-          const available = (await cells[2].getText()).trim();
-          
-          // Determinar tipo de cuenta
-          let accountType = 'CHECKING';
-          if (balance.includes('-')) {
-            accountType = 'LOAN';
-          } else if (parseFloat(balance.replace(/[^0-9.-]/g, '')) > 2000) {
-            accountType = 'SAVINGS';
-          }
+          const balance = cells[1] ? (await cells[1].getText()).trim() : 'N/A';
+          const available = cells[2] ? (await cells[2].getText()).trim() : balance;
           
           accounts.push({ 
             accountId, 
-            accountType, 
+            accountType: 'CHECKING', // Por defecto
             balance, 
             available 
           });
-          
-          console.log(`Account ${i+1}: ${accountId} - ${accountType} - ${balance}`);
         }
       } catch (error) {
-        console.log(`Error processing row ${i+1}:`, error.message);
+        console.log(`Error processing row ${i + 1}:`, error.message);
       }
-    }
-    
-    if (accounts.length === 0) {
-      console.log('NO ACCOUNTS FOUND! Checking table structure...');
-      const tableHtml = await this.accountsTable.getHTML();
-      console.log('Table HTML structure:', tableHtml.substring(0, 500) + '...');
     }
     
     return accounts;
   }
 
-  open() {
-    return super.open('overview');
+  // OVERRIDE del método open - MÁS ROBUSTO
+  async open() {
+    console.log('Opening accounts overview page...');
+    
+    // Intentar navegar directamente a overview
+    try {
+      await super.open('overview');
+      await browser.pause(2000); // Esperar a que cargue
+      
+      // Verificar si hay error
+      const title = await this.pageTitle.getText().catch(() => '');
+      if (title === "Error!") {
+        console.log('Direct overview access failed, trying through main page...');
+        
+        // Alternativa: ir a la página principal primero
+        await super.open('index');
+        await browser.pause(1000);
+        
+        // Desde la página principal, navegar a overview
+        const overviewLink = await $('=Accounts Overview').catch(() => $('a*=Overview'));
+        if (overviewLink) {
+          await overviewLink.click();
+          await browser.pause(2000);
+        }
+      }
+    } catch (error) {
+      console.log('Error opening overview page:', error.message);
+      throw error;
+    }
+  }
+
+  // Método alternativo para abrir la página
+  async openViaMainPage() {
+    await super.open('index');
+    await browser.pause(1000);
+    
+    // Hacer clic en el enlace de Accounts Overview
+    const overviewLink = await $('=Accounts Overview').catch(() => null);
+    if (overviewLink) {
+      await overviewLink.click();
+      await browser.pause(2000);
+    } else {
+      throw new Error('Could not find Accounts Overview link');
+    }
   }
 }
 

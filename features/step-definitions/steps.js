@@ -45,30 +45,26 @@ Then(/^I should see all my accounts with their current balances$/, async () => {
 });
 
 //CHECK ACCOUNT STATE
-When(/^I click on an (.*)$/,
-     async (account) => {
-       await CheckStatePage.selectAccount(account);
+When(/^I click on an (.*)$/, async (account) => {
+  await CheckStatePage.selectAccount(account);
 });
 
 Then(/^I can see the (.*) as (.*), (.*), (.*) and (.*)$/,
      async (details, balance, account, accountType, available) => {
-        if (accountType === "CHECKING") {
-          await expect(CheckStatePage.accountDetailsTitle).toBeExisting();
-          await expect(CheckStatePage.accountDetailsTitle).toHaveTextContaining(details);
-          
-          await expect(CheckStatePage.accountId).toBeExisting();
-          await expect(CheckStatePage.accountId).toHaveTextContaining(account);
-          
-          await expect(CheckStatePage.accountType).toBeExisting();
-          await expect(CheckStatePage.accountType).toHaveTextContaining(accountType);
-          
-          await expect(CheckStatePage.balance).toBeExisting();
-          await expect(CheckStatePage.balance).toHaveTextContaining(balance);
-          
-          await expect(CheckStatePage.availableBalance).toBeExisting();
-          await expect(CheckStatePage.availableBalance).toHaveTextContaining(available);
-          await CheckStatePage.logout();
-       }
+        await expect(CheckStatePage.accountDetailsTitle).toBeExisting();
+        await expect(CheckStatePage.accountDetailsTitle).toHaveTextContaining(details);
+        
+        await expect(CheckStatePage.accountId).toBeExisting();
+        await expect(CheckStatePage.accountId).toHaveTextContaining(account);
+        
+        await expect(CheckStatePage.accountType).toBeExisting();
+        await expect(CheckStatePage.accountType).toHaveTextContaining(accountType);
+        
+        await expect(CheckStatePage.balance).toBeExisting();
+        await expect(CheckStatePage.balance).toHaveTextContaining(balance);
+        
+        await expect(CheckStatePage.availableBalance).toBeExisting();
+        await expect(CheckStatePage.availableBalance).toHaveTextContaining(available);
 });
 
 // VALIDATE ACCOUNT SWITCHING

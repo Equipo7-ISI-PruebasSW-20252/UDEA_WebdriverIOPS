@@ -47,18 +47,16 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 
 //*********************************************************************************************************************************************************
 
-// CHECK ACCOUNT STATE - ACTUALIZADO
 //CHECK ACCOUNT STATE
 // Ver que la lista de cuentas aparece
 Then(/^I should see the accounts list displayed$/, async () => {
-  // Esperar a que la tabla de cuentas esté disponible
   await CheckStatePage.waitForAccountsTable();
-  const list = await CheckStatePage.accountsList;
+  const list = await CheckStatePage.accountRows;
   await expect(list.length).toBeGreaterThan(0);
 });
 
 Then(/^the accounts list should contain at least (\d+) account$/, async (minCount) => {
-  const list = await CheckStatePage.accountLinks;
+  const list = await CheckStatePage.accountRows;
   await expect(list.length).toBeGreaterThanOrEqual(parseInt(minCount, 10));
 });
 
@@ -97,7 +95,10 @@ Then(/^the previously recorded balance "([^"]+)" should not equal the current ba
 // Step para debugging - ver todas las cuentas disponibles
 Then(/^I print all available accounts$/, async () => {
   const accounts = await CheckStatePage.getAllAccountsInfo();
-  console.log('Available accounts:', accounts);
+  console.log('=== AVAILABLE ACCOUNTS ===');
+  accounts.forEach(account => {
+    console.log(`ID: ${account.accountId}, Type: ${account.accountType}, Balance: ${account.balance}, Available: ${account.available}`);
+  });
+  console.log('==========================');
 });
-
 //*********************************************************************************************************************************************************

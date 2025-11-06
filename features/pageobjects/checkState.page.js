@@ -158,6 +158,17 @@ class CheckStatePage extends Page {
     
     return accounts;
   }
+
+  async getAccountDetails() {
+    // devuelve objeto con los textos
+    return {
+      title: await this.detailsTitle.getText(),
+      accountId: await this.detailAccountId.getText(),
+      accountType: await this.detailAccountType.getText(),
+      balance: await this.detailBalance.getText(),
+      available: await this.detailAvailable.getText(),
+    };
+  }
   
   // OVERRIDE del método open
   async open() {

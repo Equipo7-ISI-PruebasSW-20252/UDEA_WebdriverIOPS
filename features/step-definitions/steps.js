@@ -29,6 +29,21 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
   } 
 });
 
+//*********************************************************************************************************************************************************
+
+// CHECK ALL ACCOUNTS VISIBLE
+Then(/^I should see all my accounts with their current balances$/, async () => {
+  const accounts = await CheckStatePage.getAllAccountNumbers();
+  expect(accounts.length).toBeGreaterThan(0);
+  
+  for (const account of accounts) {
+    const balanceElement = await CheckStatePage.getBalanceForAccount(account);
+    await expect(balanceElement).toBeExisting();
+    const balanceText = await balanceElement.getText();
+    expect(balanceText).toMatch(/^\$\d+\.\d{2}$/); // Formato de dinero
+  }
+});
+
 //CHECK ACCOUNT STATE
 When(/^I click on an (.*)$/,
      async (account) => {
@@ -38,20 +53,35 @@ When(/^I click on an (.*)$/,
 Then(/^I can see the (.*) as (.*), (.*), (.*) and (.*)$/,
      async (details, balance, account, accountType, available) => {
         if (accountType === "CHECKING") {
-          await expect($(".title")).toBeExisting();
-          await expect($(".title")).toHaveTextContaining(details);
+          await expect(CheckStatePage.accountDetailsTitle).toBeExisting();
+          await expect(CheckStatePage.accountDetailsTitle).toHaveTextContaining(details);
           
-          await expect($("//td[@id='accountId']")).toBeExisting();
-          await expect($("//td[@id='accountId']")).toHaveTextContaining(account);
+          await expect(CheckStatePage.accountId).toBeExisting();
+          await expect(CheckStatePage.accountId).toHaveTextContaining(account);
           
-          await expect($("//td[@id='accountType']")).toBeExisting();
-          await expect($("//td[@id='accountType']")).toHaveTextContaining(accountType);
+          await expect(CheckStatePage.accountType).toBeExisting();
+          await expect(CheckStatePage.accountType).toHaveTextContaining(accountType);
           
-          await expect($("//td[@id='balance']")).toBeExisting();
-          await expect($("//td[@id='balance']")).toHaveTextContaining(balance);
+          await expect(CheckStatePage.balance).toBeExisting();
+          await expect(CheckStatePage.balance).toHaveTextContaining(balance);
           
-          await expect($("//td[@id='availableBalance']")).toBeExisting();
-          await expect($("//td[@id='availableBalance']")).toHaveTextContaining(available);
+          await expect(CheckStatePage.availableBalance).toBeExisting();
+          await expect(CheckStatePage.availableBalance).toHaveTextContaining(available);
           await CheckStatePage.logout();
        }
 });
+
+// VALIDATE ACCOUNT SWITCHING
+When(/^I switch from account (.*) to account (.*)$/, async (fromAccount, toAccount) => {
+  await CheckStatePage.selectAccount(fromAccount);
+  await browser.pause(1000); // Esperar a que cargue la primera cuenta
+  await CheckStatePage.selectAccount(toAccount);
+});
+
+Then(/^I should see the details updated for account (.*)$/, async (account) => {
+  await expect(CheckStatePage.accountId).toBeExisting();
+  await expect(CheckStatePage.accountId).toHaveTextContaining(account);
+  await expect(CheckStatePage.balance).toBeExisting();
+});
+
+//*********************************************************************************************************************************************************

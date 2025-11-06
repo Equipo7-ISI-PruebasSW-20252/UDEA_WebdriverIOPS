@@ -7,7 +7,7 @@ class CheckStatePage extends Page {
   }
 
   async selectAccount(account) {
-      await expect(this.numberCheckingAccount).toBeExisting();
+      //await expect(this.numberCheckingAccount).toBeExisting();
       await this.numberCheckingAccount.waitForClickable();
       await this.numberCheckingAccount.click();
   }

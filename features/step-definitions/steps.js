@@ -97,19 +97,7 @@ Then(/^the previously recorded balance "([^"]+)" should not equal the current ba
   const details = await CheckStatePage.getAccountDetails();
   if (!recordedBalance) throw new Error('No balance recorded previously');
   
-  console.log(`=== BALANCE COMPARISON ===`);
-  console.log(`Previously recorded (${alias}): ${recordedBalance}`);
-  console.log(`Current balance: ${details.balance}`);
-  console.log(`Current account ID: ${details.accountId}`);
-  console.log(`Current account type: ${details.accountType}`);
-  console.log(`Are balances equal? ${recordedBalance === details.balance}`);
-  console.log(`===========================`);
-  
-  if (recordedBalance === details.balance) {
-    console.log('ERROR: Balances are equal! The account details did not update.');
-    console.log('This means clicking the second account did not change the displayed details.');
-  }
-  
+  console.log(`Comparing - Recorded: ${recordedBalance}, Current: ${details.balance}`);
   await expect(details.balance).not.toEqual(recordedBalance);
 });
 

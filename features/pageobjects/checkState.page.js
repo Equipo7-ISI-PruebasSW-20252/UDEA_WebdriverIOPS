@@ -91,94 +91,49 @@ class CheckStatePage extends Page {
   }
 
   async selectAccount(accountId) {
-    console.log(`Selecting account: ${accountId}`);
+  console.log(`Selecting account: ${accountId}`);
+  
+  // Método 1: Intentar con el selector de enlace
+  try {
+    const accountEl = this.accountLink(accountId);
+    await accountEl.waitForExist({ timeout: 5000 });
+    await accountEl.waitForClickable({ timeout: 5000 });
+    await accountEl.click();
+    console.log(`Clicked on account link for ${accountId}`);
+  } catch (error) {
+    console.log(`Account link not found for ${accountId}, trying alternative method...`);
     
-    // Método 1: Intentar con el selector de enlace
-    try {
-      const accountEl = this.accountLink(accountId);
-      await accountEl.waitForExist({ timeout: 5000 });
-      await accountEl.waitForClickable({ timeout: 5000 });
-      await accountEl.click();
-      console.log(`Clicked on account link for ${accountId}`);
-    } catch (error) {
-      console.log(`Account link not found for ${accountId}, trying alternative method...`);
-      
-      // Método 2: Buscar en las celdas de la tabla
-      const rows = await this.accountRows;
-      for (const row of rows) {
-        const firstCell = await row.$('td:first-child');
-        if (firstCell) {
-          const cellText = await firstCell.getText();
-          if (cellText.trim() === accountId) {
-            await firstCell.click();
-            console.log(`Clicked on account cell for ${accountId}`);
-            break;
-          }
+    // Método 2: Buscar en las celdas de la tabla
+    const rows = await this.accountRows;
+    for (const row of rows) {
+      const firstCell = await row.$('td:first-child');
+      if (firstCell) {
+        const cellText = await firstCell.getText();
+        if (cellText.trim() === accountId) {
+          await firstCell.click();
+          console.log(`Clicked on account cell for ${accountId}`);
+          break;
         }
       }
     }
-    
-    // Esperar a que la página responda
-    await browser.pause(3000);
-    
-    // Esperar a que cargue la nueva página o se actualice el panel
-    await this.detailsTitle.waitForExist({ timeout: 10000 });
-    await this.detailsTitle.waitForDisplayed({ timeout: 10000 });
-    
-    console.log('Account selection completed');
   }
-
-  async getAccountDetails() {
-    console.log('Getting account details...');
-    
-    // Esperar a que los detalles estén disponibles
-    await this.detailsTitle.waitForExist({ timeout: 10000 });
-    
-    let accountId, accountType, balance, available;
-    
-    try {
-      // Intentar diferentes patrones para obtener los detalles
-      accountId = await this.detailAccountId.getText();
-    } catch (e) {
-      console.log('Could not find account ID with standard selector');
-      // Fallback: buscar en el título
-      const title = await this.detailsTitle.getText();
-      accountId = title.match(/\d+/)?.[0] || 'Not found';
-    }
-    
-    try {
-      accountType = await this.detailAccountType.getText();
-    } catch (e) {
-      console.log('Could not find account type with standard selector');
-      accountType = 'CHECKING'; // Valor por defecto
-    }
-    
-    try {
-      balance = await this.detailBalance.getText();
-    } catch (e) {
-      console.log('Could not find balance with standard selector');
-      // Buscar cualquier elemento que contenga signo de dólar
-      const balanceElement = await $('//*[contains(text(), "$")]').catch(() => null);
-      balance = balanceElement ? await balanceElement.getText() : '$0.00';
-    }
-    
-    try {
-      available = await this.detailAvailable.getText();
-    } catch (e) {
-      available = balance; // Usar balance como fallback
-    }
-
-    const details = {
-      title: await this.detailsTitle.getText(),
-      accountId: accountId.trim(),
-      accountType: accountType.trim(),
-      balance: balance.trim(),
-      available: available.trim(),
-    };
-    
-    console.log('Retrieved account details:', details);
-    return details;
-  }
+  
+  // Esperar a que la página responda
+  await browser.pause(3000);
+  
+  // VERIFICAR ACTUALIZACIÓN - AGREGAR ESTO
+  const currentUrl = await browser.getUrl();
+  console.log(`URL after clicking ${accountId}: ${currentUrl}`);
+  
+  const pageTitle = await this.detailsTitle.getText().catch(() => 'No title');
+  console.log(`Title after clicking ${accountId}: "${pageTitle}"`);
+  
+  // Esperar a que cargue la nueva página o se actualice el panel
+  await this.detailsTitle.waitForExist({ timeout: 10000 });
+  await this.detailsTitle.waitForDisplayed({ timeout: 10000 });
+  
+  console.log('Account selection completed');
+}
 
   // Método para obtener información de cuentas
   async getAllAccountsInfo() {

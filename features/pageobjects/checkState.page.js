@@ -6,12 +6,12 @@ class CheckStatePage extends Page {
     return $("#accountTable");
   }
 
-  // selector para listado de cuentas - ACTUALIZADO
+  // selector para listado de cuentas
   get accountsList() {
-    return $$("#accountTable tbody tr");
+    return $$("#accountTable tbody tr a");
   }
 
-  // selector para enlaces de cuenta - ACTUALIZADO
+  // selector para enlaces de cuenta
   get accountLinks() {
     return $$("#accountTable tbody tr td:nth-child(1) a");
   }

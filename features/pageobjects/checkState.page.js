@@ -16,7 +16,7 @@ class CheckStatePage extends Page {
     return $("h1.title");
   }
 
-  // Método mejorado para wait - MÁS FLEXIBLE
+  // Método mejorado para wait
   async waitForAccountsTable() {
     console.log('Waiting for accounts page to load...');
     
@@ -33,7 +33,7 @@ class CheckStatePage extends Page {
       throw new Error(`Application error: ${titleText}. Check if overview page is accessible.`);
     }
     
-    // Esperar a que la tabla exista (ser más flexible con el selector)
+    // Esperar a que la tabla exista
     try {
       await this.accountsTable.waitForExist({ timeout: 10000 });
       await this.accountsTable.waitForDisplayed({ timeout: 10000 });
@@ -65,7 +65,7 @@ class CheckStatePage extends Page {
     console.log('Accounts list is displayed successfully');
   }
 
-  // Método para obtener información de cuentas - SIMPLIFICADO
+  // Método para obtener información de cuentas
   async getAllAccountsInfo() {
     await this.waitForAccountsTable();
     const rows = await this.accountRows;
@@ -96,7 +96,16 @@ class CheckStatePage extends Page {
     return accounts;
   }
 
-  // OVERRIDE del método open - MÁS ROBUSTO
+  async selectAccount(account) {
+    const accountEl = this.accountLink(account);
+    await accountEl.waitForExist({ timeout: 5000 });
+    await accountEl.waitForClickable({ timeout: 5000 });
+    await accountEl.click();
+    // esperar a que el panel de detalles se actualice
+    await this.detailsTitle.waitForDisplayed({ timeout: 5000 });
+  }
+
+  // OVERRIDE del método open
   async open() {
     console.log('Opening accounts overview page...');
     

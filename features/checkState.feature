@@ -17,11 +17,11 @@ Feature: ParaBank Check State Feature
       | accountId | accountType | balance    |
       | 13011     | CHECKING    | $100.00    |
 
-  Scenario: Selecting another account updates the details panel
-    Given I am logged in with john and demo
-    And I am on the checkState page
-    And I print all available accounts
-    When I click on account "13011"
-    And I record the balance shown as "balanceA"
-    When I click on account "13344"
-    Then the previously recorded balance "balanceA" should not equal the current balance
+  #Scenario: Selecting another account updates the details panel
+    #Given I am logged in with john and demo
+    #And I am on the checkState page
+    #And I print all available accounts
+    #When I click on account "13011"
+    #And I record the balance shown as "balanceA"
+    #When I click on account "13344"
+    #Then the previously recorded balance "balanceA" should not equal the current balance

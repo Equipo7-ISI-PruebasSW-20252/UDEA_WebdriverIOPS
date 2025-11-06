@@ -7,7 +7,7 @@ class CheckStatePage extends Page {
   }
 
   // selector para filas de la tabla
-  get accountRows() {
+  get accountRows() { 
     return $$("table#accountTable tbody tr");
   }
 

@@ -16,12 +16,12 @@ Feature: ParaBank Check State Feature
 
     Examples:
       | accountId | accountType | balance    |
-      | 13011     | CHECKING    | $123.00    |
-      | 14022     | SAVINGS     | $2,345.67  |
+      | 13011     | CHECKING    | $100.00    |
+      | 13344     | SAVINGS     | $1231.10   |
 
   Scenario: Selecting another account updates the details panel
     Given I am on the checkState page
     When I click on account "13011"
     And I record the balance shown as "balanceA"
-    When I click on account "14022"
+    When I click on account "13344"
     Then the previously recorded balance "balanceA" should not equal the current balance

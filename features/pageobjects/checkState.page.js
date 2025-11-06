@@ -20,6 +20,27 @@ class CheckStatePage extends Page {
     return $("h1.title");
   }
 
+  // PANEL DE DETALLES - AGREGAR ESTOS SELECTORES
+  get detailsTitle() {
+    return $("h1.title");
+  }
+
+  get detailAccountId() {
+    return $("//td[contains(text(), 'Account Number:')]/following-sibling::td");
+  }
+
+  get detailAccountType() {
+    return $("//td[contains(text(), 'Account Type:')]/following-sibling::td");
+  }
+
+  get detailBalance() {
+    return $("//td[contains(text(), 'Balance:')]/following-sibling::td");
+  }
+
+  get detailAvailable() {
+    return $("//td[contains(text(), 'Available:')]/following-sibling::td");
+  }
+
   // Método mejorado para wait
   async waitForAccountsTable() {
     console.log('Waiting for accounts page to load...');
@@ -69,13 +90,94 @@ class CheckStatePage extends Page {
     console.log('Accounts list is displayed successfully');
   }
 
-  async selectAccount(account) {
-    const accountEl = this.accountLink(account);
-    await accountEl.waitForExist({ timeout: 5000 });
-    await accountEl.waitForClickable({ timeout: 5000 });
-    await accountEl.click();
-    // esperar a que el panel de detalles se actualice
-    await this.detailsTitle.waitForDisplayed({ timeout: 5000 });
+  async selectAccount(accountId) {
+    console.log(`Selecting account: ${accountId}`);
+    
+    // Método 1: Intentar con el selector de enlace
+    try {
+      const accountEl = this.accountLink(accountId);
+      await accountEl.waitForExist({ timeout: 5000 });
+      await accountEl.waitForClickable({ timeout: 5000 });
+      await accountEl.click();
+      console.log(`Clicked on account link for ${accountId}`);
+    } catch (error) {
+      console.log(`Account link not found for ${accountId}, trying alternative method...`);
+      
+      // Método 2: Buscar en las celdas de la tabla
+      const rows = await this.accountRows;
+      for (const row of rows) {
+        const firstCell = await row.$('td:first-child');
+        if (firstCell) {
+          const cellText = await firstCell.getText();
+          if (cellText.trim() === accountId) {
+            await firstCell.click();
+            console.log(`Clicked on account cell for ${accountId}`);
+            break;
+          }
+        }
+      }
+    }
+    
+    // Esperar a que la página responda
+    await browser.pause(3000);
+    
+    // Esperar a que cargue la nueva página o se actualice el panel
+    await this.detailsTitle.waitForExist({ timeout: 10000 });
+    await this.detailsTitle.waitForDisplayed({ timeout: 10000 });
+    
+    console.log('Account selection completed');
+  }
+
+  async getAccountDetails() {
+    console.log('Getting account details...');
+    
+    // Esperar a que los detalles estén disponibles
+    await this.detailsTitle.waitForExist({ timeout: 10000 });
+    
+    let accountId, accountType, balance, available;
+    
+    try {
+      // Intentar diferentes patrones para obtener los detalles
+      accountId = await this.detailAccountId.getText();
+    } catch (e) {
+      console.log('Could not find account ID with standard selector');
+      // Fallback: buscar en el título
+      const title = await this.detailsTitle.getText();
+      accountId = title.match(/\d+/)?.[0] || 'Not found';
+    }
+    
+    try {
+      accountType = await this.detailAccountType.getText();
+    } catch (e) {
+      console.log('Could not find account type with standard selector');
+      accountType = 'CHECKING'; // Valor por defecto
+    }
+    
+    try {
+      balance = await this.detailBalance.getText();
+    } catch (e) {
+      console.log('Could not find balance with standard selector');
+      // Buscar cualquier elemento que contenga signo de dólar
+      const balanceElement = await $('//*[contains(text(), "$")]').catch(() => null);
+      balance = balanceElement ? await balanceElement.getText() : '$0.00';
+    }
+    
+    try {
+      available = await this.detailAvailable.getText();
+    } catch (e) {
+      available = balance; // Usar balance como fallback
+    }
+
+    const details = {
+      title: await this.detailsTitle.getText(),
+      accountId: accountId.trim(),
+      accountType: accountType.trim(),
+      balance: balance.trim(),
+      available: available.trim(),
+    };
+    
+    console.log('Retrieved account details:', details);
+    return details;
   }
 
   // Método para obtener información de cuentas

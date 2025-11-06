@@ -12,6 +12,11 @@ Given(/^I am on the (\w+) page$/, async (page) => {
   await pages[page].open();
 });
 
+Given(/^I am logged in with (\w+) and (.*)$/, async (username, password) => {
+  await LoginPage.open();
+  await LoginPage.login(username, password);
+});
+
 //LOGIN
 When(/^I login with (\w+) and (.*)$/, async (username, password) => {
   await LoginPage.login(username, password);
@@ -34,9 +39,10 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 //CHECK ACCOUNT STATE
 // Ver que la lista de cuentas aparece
 Then(/^I should see the accounts list displayed$/, async () => {
-  await expect(CheckStatePage.accountsList.length).toBeGreaterThan(0);
-  // o más robusto:
-  await expect(CheckStatePage.accountsList[0]).toBeExisting();
+  // Esperar a que exista al menos un elemento
+  await browser.pause(1000); // Pequeña pausa para estabilizar
+  const list = await CheckStatePage.accountsList;
+  await expect(list.length).toBeGreaterThan(0);
 });
 
 Then(/^the accounts list should contain at least (\d+) account$/, async (minCount) => {

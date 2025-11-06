@@ -1,76 +1,59 @@
 import Page from "./page.js";
 
 class CheckStatePage extends Page {
-
-  // Selectores mejorados
-  get accountDetailsTitle() {
-    return $('h1.title');
+  // selector para listado de cuentas (ajusta según DOM real)
+  get accountsList() {
+    return $$("//div[@id='accountTable']//a"); // devuelve array de elementos <a> con números de cuenta
   }
 
-  get accountId() {
-    return $('#accountId');
+  accountLink(accountId) {
+    return $(`//a[normalize-space()="${accountId}"]`);
   }
 
-  get accountType() {
-    return $('#accountType');
+  // panel de detalles
+  get detailsTitle() {
+    return $(".title");
   }
 
-  get balance() {
-    return $('#balance');
+  get detailAccountId() {
+    return $("//td[@id='accountId']");
   }
 
-  get availableBalance() {
-    return $('#availableBalance');
+  get detailAccountType() {
+    return $("//td[@id='accountType']");
   }
 
-  get accountsOverviewLink() {
-    return $('//a[contains(text(), "Accounts Overview")]');
+  get detailBalance() {
+    return $("//td[@id='balance']");
   }
 
-  // Método para obtener todas las cuentas
-  get allAccounts() {
-    return $$("//a[contains(@href, 'activity')]");
+  get detailAvailable() {
+    return $("//td[@id='availableBalance']");
   }
 
   async selectAccount(account) {
-    const accountElement = await $(`//a[normalize-space()='${account}']`);
-    await expect(accountElement).toBeExisting();
-    await accountElement.waitForClickable();
-    await accountElement.click();
+    const accountEl = this.accountLink(account);
+    await accountEl.waitForExist({ timeout: 5000 });
+    await accountEl.waitForClickable({ timeout: 5000 });
+    await accountEl.click();
+    // esperar a que el panel de detalles se actualice
+    await this.detailsTitle.waitForDisplayed({ timeout: 5000 });
   }
 
-  async goToAccountsOverview() {
-    await this.accountsOverviewLink.waitForClickable();
-    await this.accountsOverviewLink.click();
+  async getAccountDetails() {
+    // devuelve objeto con los textos
+    return {
+      title: await this.detailsTitle.getText(),
+      accountId: await this.detailAccountId.getText(),
+      accountType: await this.detailAccountType.getText(),
+      balance: await this.detailBalance.getText(),
+      available: await this.detailAvailable.getText(),
+    };
   }
 
-  async getAllAccountNumbers() {
-    const accounts = await this.allAccounts;
-    const accountNumbers = [];
-    
-    for (const account of accounts) {
-      const accountText = await account.getText();
-      // Solo tomar números de cuenta (evitar enlaces de texto)
-      if (/^\d+$/.test(accountText)) {
-        accountNumbers.push(accountText);
-      }
-    }
-    
-    return accountNumbers;
-  }
-
-  async getBalanceForAccount(accountNumber) {
-    return await $(`//a[text()='${accountNumber}']/ancestor::tr//td[contains(@class, 'balance')]`);
-  }
-
-  async getTotalAccountsCount() {
-    const accounts = await this.getAllAccountNumbers();
-    return accounts.length;
-  }
-
-  open () {
+  open() {
     return super.open('overview');
-  } 
+  }
 }
 
 export default new CheckStatePage();

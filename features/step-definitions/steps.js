@@ -48,9 +48,12 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 //*********************************************************************************************************************************************************
 
 // CHECK ACCOUNT STATE - ACTUALIZADO
+//CHECK ACCOUNT STATE
+// Ver que la lista de cuentas aparece
 Then(/^I should see the accounts list displayed$/, async () => {
+  // Esperar a que la tabla de cuentas esté disponible
   await CheckStatePage.waitForAccountsTable();
-  const list = await CheckStatePage.accountLinks;
+  const list = await CheckStatePage.accountsList;
   await expect(list.length).toBeGreaterThan(0);
 });
 

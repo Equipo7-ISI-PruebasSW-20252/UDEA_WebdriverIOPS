@@ -25,12 +25,7 @@ class CheckStatePage extends Page {
 
   // Método para obtener todas las cuentas
   get allAccounts() {
-    return $$("//tr[contains(@ng-repeat, 'account')]//a[contains(@href, 'activity')]");
-  }
-
-  // Método para obtener balances de todas las cuentas
-  get allAccountBalances() {
-    return $$("//tr[contains(@ng-repeat, 'account')]//td[contains(@class, 'balance')]");
+    return $$("//a[contains(@href, 'activity')]");
   }
 
   async selectAccount(account) {
@@ -46,7 +41,10 @@ class CheckStatePage extends Page {
     
     for (const account of accounts) {
       const accountText = await account.getText();
-      accountNumbers.push(accountText);
+      // Solo tomar números de cuenta (evitar enlaces de texto)
+      if (/^\d+$/.test(accountText)) {
+        accountNumbers.push(accountText);
+      }
     }
     
     return accountNumbers;
@@ -57,7 +55,7 @@ class CheckStatePage extends Page {
   }
 
   async getTotalAccountsCount() {
-    const accounts = await this.allAccounts;
+    const accounts = await this.getAllAccountNumbers();
     return accounts.length;
   }
 

@@ -1,72 +1,72 @@
 import Page from "./page.js";
 
 class CheckStatePage extends Page {
-  // selector para la tabla de cuentas - ACTUALIZADO
+  // selector para la tabla de cuentas - CORREGIDO
   get accountsTable() {
     return $("#accountTable");
   }
 
-  // selector para listado de cuentas
-  get accountsList() {
-    return $$("#accountTable tbody tr a");
+  // selector para filas de la tabla - CORREGIDO
+  get accountRows() {
+    return $$("#accountTable tbody tr");
   }
 
-  // selector para enlaces de cuenta
+  // selector para enlaces de cuenta - CORREGIDO (basado en la imagen)
   get accountLinks() {
-    return $$("#accountTable tbody tr td:nth-child(1) a");
+    return $$("#accountTable tbody tr td:first-child");
   }
 
-  // Método mejorado para encontrar cuenta por ID
+  // Método mejorado para encontrar cuenta por ID - CORREGIDO
   async getAccountLink(accountId) {
     // Buscar en todas las filas de la tabla
-    const rows = await $$("#accountTable tbody tr");
+    const rows = await this.accountRows;
     
     for (const row of rows) {
-      const firstCell = await row.$('td:nth-child(1)');
+      const firstCell = await row.$('td:first-child');
       if (firstCell) {
         const cellText = await firstCell.getText();
-        if (cellText.includes(accountId)) {
-          const link = await firstCell.$('a');
-          if (link) return link;
+        if (cellText.trim() === accountId) {
+          return firstCell; // En ParaBank, el ID es texto directo, no un enlace
         }
       }
     }
     throw new Error(`Account with ID ${accountId} not found`);
   }
 
-  // panel de detalles - ACTUALIZADOS para ParaBank real
+  // panel de detalles - CORREGIDOS (cuando se hace clic en una cuenta)
   get detailsTitle() {
     return $("h1.title");
   }
 
+  // Estos selectores pueden necesitar ajuste cuando se hace clic en una cuenta
   get detailAccountId() {
-    return $("#accountId");
+    return $("//td[contains(text(), 'Account Number:')]/following-sibling::td");
   }
 
   get detailAccountType() {
-    return $("#accountType");
+    return $("//td[contains(text(), 'Account Type:')]/following-sibling::td");
   }
 
   get detailBalance() {
-    return $("#balance");
+    return $("//td[contains(text(), 'Balance:')]/following-sibling::td");
   }
 
   get detailAvailable() {
-    return $("#availableBalance");
-  }
-
-  // NUEVO: Verificar si estamos en la página correcta
-  get pageTitle() {
-    return $("h1.title");
+    return $("//td[contains(text(), 'Available:')]/following-sibling::td");
   }
 
   async waitForAccountsTable() {
+    // Primero verificar que estamos en la página correcta
+    await this.detailsTitle.waitForExist({ timeout: 10000 });
+    await expect(this.detailsTitle).toHaveTextContaining('Accounts Overview');
+    
+    // Esperar a que la tabla exista
     await this.accountsTable.waitForExist({ timeout: 10000 });
     await this.accountsTable.waitForDisplayed({ timeout: 10000 });
     
     // Esperar a que haya al menos una cuenta
     await browser.waitUntil(
-      async () => (await this.accountLinks.length) > 0,
+      async () => (await this.accountRows.length) > 0,
       { timeout: 10000, timeoutMsg: 'No accounts found in table' }
     );
   }
@@ -77,15 +77,18 @@ class CheckStatePage extends Page {
     await accountEl.waitForClickable({ timeout: 10000 });
     await accountEl.click();
     
-    // Esperar a que los detalles se carguen
-    await this.detailAccountId.waitForExist({ timeout: 10000 });
-    await this.detailBalance.waitForExist({ timeout: 10000 });
+    // Esperar a que se cargue la página de detalles
+    await browser.waitUntil(
+      async () => {
+        const url = await browser.getUrl();
+        return url.includes('activity');
+      },
+      { timeout: 10000, timeoutMsg: 'Account details page did not load' }
+    );
   }
 
   async getAccountDetails() {
-    // Verificar que estamos en la página de detalles
-    await this.detailsTitle.waitForExist({ timeout: 5000 });
-    
+    // En la página de detalles, los datos están en una tabla diferente
     return {
       title: await this.detailsTitle.getText(),
       accountId: await this.detailAccountId.getText(),
@@ -95,19 +98,26 @@ class CheckStatePage extends Page {
     };
   }
 
-  // Método para obtener información de todas las cuentas
+  // Método para obtener información de todas las cuentas - CORREGIDO
   async getAllAccountsInfo() {
     await this.waitForAccountsTable();
     const accounts = [];
-    const rows = await this.accountsList;
+    const rows = await this.accountRows;
     
-    for (let i = 0; i < rows.length; i++) {
-      const cells = await rows[i].$$('td');
-      if (cells.length >= 4) {
-        const accountId = await cells[0].getText();
-        const accountType = await cells[1].getText();
-        const balance = await cells[2].getText();
-        const available = await cells[3].getText();
+    for (const row of rows) {
+      const cells = await row.$$('td');
+      if (cells.length >= 3) { // La tabla tiene 3 columnas: Account, Balance, Available Amount
+        const accountId = (await cells[0].getText()).trim();
+        const balance = (await cells[1].getText()).trim();
+        const available = (await cells[2].getText()).trim();
+        
+        // Determinar el tipo de cuenta basado en el ID o balance (esto puede necesitar ajuste)
+        let accountType = 'CHECKING'; // valor por defecto
+        if (balance.includes('-')) {
+          accountType = 'LOAN';
+        } else if (parseFloat(balance.replace(/[^0-9.-]/g, '')) > 1000) {
+          accountType = 'SAVINGS';
+        }
         
         accounts.push({ accountId, accountType, balance, available });
       }

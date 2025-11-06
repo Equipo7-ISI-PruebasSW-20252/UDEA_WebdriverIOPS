@@ -50,7 +50,7 @@ When(/^I click on an (.*)$/, async (account) => {
 });
 
 Then(/^I can see the (.*) as (.*), (.*), (.*) and (.*)$/,
-     async (details, balance, account, accountType, available) => {
+     async (details, account, accountType, balance, available) => {
         await expect(CheckStatePage.accountDetailsTitle).toBeExisting();
         await expect(CheckStatePage.accountDetailsTitle).toHaveTextContaining(details);
         
@@ -71,6 +71,7 @@ Then(/^I can see the (.*) as (.*), (.*), (.*) and (.*)$/,
 When(/^I switch from account (.*) to account (.*)$/, async (fromAccount, toAccount) => {
   await CheckStatePage.selectAccount(fromAccount);
   await browser.pause(1000); // Esperar a que cargue la primera cuenta
+  await CheckStatePage.goToAccountsOverview(); // Volver a la vista general
   await CheckStatePage.selectAccount(toAccount);
 });
 

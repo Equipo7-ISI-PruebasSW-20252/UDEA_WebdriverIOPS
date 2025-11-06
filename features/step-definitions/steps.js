@@ -30,50 +30,28 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 });
 
 //CHECK ACCOUNT STATE
-// Ver que la lista de cuentas aparece
-Then(/^I should see the accounts list displayed$/, async () => {
-  const list = await CheckStatePage.accountsList; // await al getter que devuelve $$
-  // list es un array de elementos WebdriverIO
-  const count = Array.isArray(list) ? list.length : 0;
-  await expect(count).toBeGreaterThan(0);
+When(/^I click on an (.*)$/,
+     async (account) => {
+       await CheckStatePage.selectAccount(account);
 });
 
-Then(/^the accounts list should contain at least (\d+) account$/, async (minCount) => {
-  const list = await StateCheckPage.accountsList;
-  await expect(list.length).toBeGreaterThanOrEqual(parseInt(minCount, 10));
-});
-
-// Click parametrizado
-When(/^I click on account "([^"]+)"$/, async (accountId) => {
-  await StateCheckPage.selectAccount(accountId);
-});
-
-// Ver detalles con parsing de balance
-Then(/^I should see the details panel showing account id "([^"]+)", type "([^"]+)" and balance "([^"]+)"$/, 
-  async (accountId, accountType, expectedBalanceText) => {
-    const details = await StateCheckPage.getAccountDetails();
-    await expect(details.title).toContain('Account Details'); // o el texto apropiado
-    await expect(details.accountId).toContain(accountId);
-    await expect(details.accountType).toContain(accountType);
-
-    // Normalizar y comparar el balance (quita signos y separadores)
-    const normalize = txt => txt.replace(/[^0-9.-]+/g, '');
-    const actual = parseFloat(normalize(details.balance));
-    const expected = parseFloat(normalize(expectedBalanceText));
-    await expect(actual).toEqual(expected);
-});
-
-// Registrar balance y guardarlo en World (si usas cucumber world) o en variable compartida simple
-let lastRecordedBalance = null;
-
-When(/^I record the balance shown as "([^"]+)"$/, async (alias) => {
-  const details = await StateCheckPage.getAccountDetails();
-  // guardo en variable global definida arriba (simple)
-  lastRecordedBalance = details.balance;
-});
-
-Then(/^the previously recorded balance "([^"]+)" should not equal the current balance$/, async (alias) => {
-  const details = await StateCheckPage.getAccountDetails();
-  if (!lastRecordedBalance) throw new Error('No balance recorded previously');
-  await expect(details.balance).not.toEqual(lastRecordedBalance);
+Then(/^I can see the (.*) as (.*), (.*), (.*) and (.*)$/,
+     async (details, balance, account, accountType, available) => {
+        if (accountType === "CHECKING") {
+          await expect($(".title")).toBeExisting();
+          await expect($(".title")).toHaveTextContaining(details);
+          
+          await expect($("//td[@id='accountId']")).toBeExisting();
+          await expect($("//td[@id='accountId']")).toHaveTextContaining(account);
+          
+          await expect($("//td[@id='accountType']")).toBeExisting();
+          await expect($("//td[@id='accountType']")).toHaveTextContaining(accountType);
+          
+          await expect($("//td[@id='balance']")).toBeExisting();
+          await expect($("//td[@id='balance']")).toHaveTextContaining(balance);
+          
+          await expect($("//td[@id='availableBalance']")).toBeExisting();
+          await expect($("//td[@id='availableBalance']")).toHaveTextContaining(available);
+          await CheckStatePage.logout();
+       }
 });

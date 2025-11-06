@@ -11,4 +11,14 @@ Feature: Para Bank Check State Feature
 
     Examples:
       |        details        |     balance     |   account   |   accountType   |   available   |
-      |     Account Details   |     $35.50      |    22113    |    CHECKING     |     $35.50    |
+      |     Account Details   |     $100.00     |    13011    |    CHECKING     |     $100.00   |
+      |     Account Details   |     $1231.10    |    13344    |    SAVINGS      |     $1231.10  |
+
+  Scenario: Verify all accounts are displayed with balances
+    Given I am on the checkState page
+    Then I should see all my accounts with their current balances
+
+  Scenario: Verify account switching updates the view
+    Given I am on the checkState page
+    When I switch from account 13011 to account 13344
+    Then I should see the details updated for account 13344

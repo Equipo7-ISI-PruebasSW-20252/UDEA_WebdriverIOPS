@@ -23,6 +23,10 @@ class CheckStatePage extends Page {
     return $('#availableBalance');
   }
 
+  get accountsOverviewLink() {
+    return $('//a[contains(text(), "Accounts Overview")]');
+  }
+
   // Método para obtener todas las cuentas
   get allAccounts() {
     return $$("//a[contains(@href, 'activity')]");
@@ -33,6 +37,11 @@ class CheckStatePage extends Page {
     await expect(accountElement).toBeExisting();
     await accountElement.waitForClickable();
     await accountElement.click();
+  }
+
+  async goToAccountsOverview() {
+    await this.accountsOverviewLink.waitForClickable();
+    await this.accountsOverviewLink.click();
   }
 
   async getAllAccountNumbers() {

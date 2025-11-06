@@ -8,6 +8,8 @@ const pages = {
   checkState: CheckStatePage,
 };
 
+let recordedBalance = null;
+
 Given(/^I am on the (\w+) page$/, async (page) => {
   await pages[page].open();
 });
@@ -85,16 +87,21 @@ Then(/^I should see the details panel showing account id "([^"]+)", type "([^"]+
 
 When(/^I record the balance shown as "([^"]+)"$/, async (alias) => {
   const details = await CheckStatePage.getAccountDetails();
-  this.recordedBalance = details.balance;
+  // Usar variable global en lugar de this
+  recordedBalance = details.balance;
+  console.log(`Recorded balance for ${alias}: ${recordedBalance}`);
 });
 
+// SOLUCIÓN: Usar variable global en lugar de this
 Then(/^the previously recorded balance "([^"]+)" should not equal the current balance$/, async (alias) => {
   const details = await CheckStatePage.getAccountDetails();
-  if (!this.recordedBalance) throw new Error('No balance recorded previously');
-  await expect(details.balance).not.toEqual(this.recordedBalance);
+  if (!recordedBalance) throw new Error('No balance recorded previously');
+  
+  console.log(`Comparing - Recorded: ${recordedBalance}, Current: ${details.balance}`);
+  await expect(details.balance).not.toEqual(recordedBalance);
 });
 
-// Step para debugging - NUEVO Y CORREGIDO
+// Step para debugging
 Then(/^I print all available accounts$/, async () => {
   try {
     const accounts = await CheckStatePage.getAllAccountsInfo();
@@ -119,5 +126,11 @@ Then(/^I print all available accounts$/, async () => {
     const tableExists = await CheckStatePage.accountsTable.isExisting().catch(() => false);
     console.log(`Table exists: ${tableExists}`);
   }
+});
+
+// Step adicional para resetear el balance grabado (opcional)
+When(/^I reset the recorded balance$/, async () => {
+  recordedBalance = null;
+  console.log('Recorded balance reset');
 });
 //*********************************************************************************************************************************************************

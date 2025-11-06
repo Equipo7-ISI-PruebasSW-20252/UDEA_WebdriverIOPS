@@ -32,9 +32,10 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 //CHECK ACCOUNT STATE
 // Ver que la lista de cuentas aparece
 Then(/^I should see the accounts list displayed$/, async () => {
-  await expect(StateCheckPage.accountsList.length).toBeGreaterThan(0);
-  // o más robusto:
-  await expect(StateCheckPage.accountsList[0]).toBeExisting();
+  const list = await CheckStatePage.accountsList; // await al getter que devuelve $$
+  // list es un array de elementos WebdriverIO
+  const count = Array.isArray(list) ? list.length : 0;
+  await expect(count).toBeGreaterThan(0);
 });
 
 Then(/^the accounts list should contain at least (\d+) account$/, async (minCount) => {

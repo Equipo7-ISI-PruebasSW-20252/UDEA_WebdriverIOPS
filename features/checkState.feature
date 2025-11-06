@@ -16,8 +16,8 @@ Feature: ParaBank Check State Feature
 
     Examples:
       | accountId | accountType | balance    |
-      | 13344     | CHECKING    | $3972.93   |
-      | 13899     | LOAN        | $100.00    |
+      | 13344     | CHECKING    | $4722.93   |
+      | 13899     | SAVINGS     | $100.00    |
 
   Scenario: Selecting another account updates the details panel
     Given I am logged in with john and demo

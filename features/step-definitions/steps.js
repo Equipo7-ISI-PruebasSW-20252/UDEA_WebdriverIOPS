@@ -141,6 +141,7 @@ When(/^I reset the recorded balance$/, async () => {
 
 // Fill in loan amount
 When(/^I fill in loan amount with "([^"]+)"$/, async (amount) => {
+  await SimulacionPrestamoPage.inputLoanAmount.waitForExist({ timeout: 10000 });
   await SimulacionPrestamoPage.inputLoanAmount.waitForDisplayed({ timeout: 10000 });
   await SimulacionPrestamoPage.inputLoanAmount.setValue(amount);
 });

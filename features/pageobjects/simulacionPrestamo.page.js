@@ -197,8 +197,41 @@ class SimulacionPrestamoPage extends Page {
   /**
    * overwrite specific options to adapt it to page object
    */
-  open() {
-    return super.open('requestloan');
+  async open() {
+    console.log('Opening loan request page...');
+    
+    // Intentar navegar directamente a requestloan
+    try {
+      await super.open('requestloan');
+      await browser.pause(2000); // Esperar a que cargue
+      
+      // Verificar si el campo amount existe
+      const amountField = await this.inputLoanAmount;
+      if (await amountField.isExisting()) {
+        console.log('Loan request page loaded successfully');
+        return;
+      }
+    } catch (error) {
+      console.log('Direct requestloan access failed, trying through menu...');
+    }
+    
+    // Si no funciona, navegar desde el menú
+    try {
+      // Ir a la página principal primero
+      await super.open('index');
+      await browser.pause(1000);
+      
+      // Hacer clic en el link "Request Loan" del menú
+      const requestLoanLink = await $("//*[@id='leftPanel']/ul/li[7]/a");
+      await requestLoanLink.waitForClickable({ timeout: 10000 });
+      await requestLoanLink.click();
+      await browser.pause(2000);
+      
+      console.log('Navigated to loan request page via menu');
+    } catch (error) {
+      console.log('Error opening loan request page:', error.message);
+      throw error;
+    }
   }
 }
 

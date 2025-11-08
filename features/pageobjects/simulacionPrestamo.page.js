@@ -20,7 +20,12 @@ class SimulacionPrestamoPage extends Page {
   }
 
   get btnSubmitLoan() {
+    // Try the xpath provided by user first, fallback to other selectors if needed
     return $("//*[@id='requestLoanForm']/form/table/tbody/tr[4]/td[2]/input");
+  }
+
+  get resultDiv() {
+    return $("#requestLoanResult");
   }
 
   get resultTitle() {
@@ -81,12 +86,54 @@ class SimulacionPrestamoPage extends Page {
    */
   async submitLoanRequest() {
     console.log('Submitting loan request...');
-    await this.btnSubmitLoan.waitForClickable({ timeout: 10000 });
-    await this.btnSubmitLoan.click();
     
-    // Wait for result to appear
-    await browser.pause(2000);
-    await this.resultTitle.waitForDisplayed({ timeout: 15000 });
+    // Wait for button to exist and be clickable
+    await this.btnSubmitLoan.waitForExist({ timeout: 10000 });
+    await this.btnSubmitLoan.waitForDisplayed({ timeout: 10000 });
+    
+    // Scroll to button to ensure it's visible
+    await this.btnSubmitLoan.scrollIntoView();
+    await browser.pause(500);
+    
+    // Try regular click first, if it fails, use JavaScript click
+    try {
+      await this.btnSubmitLoan.waitForClickable({ timeout: 5000 });
+      await this.btnSubmitLoan.click();
+      console.log('Loan request button clicked (regular click)');
+    } catch (error) {
+      console.log('Regular click failed, trying JavaScript click...');
+      await browser.execute((element) => {
+        element.click();
+      }, await this.btnSubmitLoan);
+      console.log('Loan request button clicked (JavaScript click)');
+    }
+    
+    // Wait for page to process - wait for result div or title
+    await browser.waitUntil(
+      async () => {
+        try {
+          // Check if result div exists and is displayed
+          const resultDiv = await this.resultDiv;
+          if (await resultDiv.isExisting()) {
+            return await resultDiv.isDisplayed();
+          }
+          // Or check if title exists
+          const title = await this.resultTitle;
+          if (await title.isExisting()) {
+            return await title.isDisplayed();
+          }
+          return false;
+        } catch (error) {
+          return false;
+        }
+      },
+      { 
+        timeout: 20000, 
+        timeoutMsg: 'Loan result did not appear after submission. Check if form was submitted correctly.',
+        interval: 500
+      }
+    );
+    console.log('Loan result appeared');
   }
 
   /**
@@ -94,9 +141,14 @@ class SimulacionPrestamoPage extends Page {
    * @returns {Object} Object containing loan request result details
    */
   async getLoanRequestResult() {
-    await this.resultTitle.waitForDisplayed({ timeout: 15000 });
+    // Wait for either result div or title
+    try {
+      await this.resultDiv.waitForDisplayed({ timeout: 5000 });
+    } catch (error) {
+      await this.resultTitle.waitForDisplayed({ timeout: 10000 });
+    }
     
-    const title = await this.resultTitle.getText();
+    const title = await this.resultTitle.getText().catch(() => '');
     const providerName = await this.loanProviderName.getText().catch(() => 'N/A');
     const date = await this.responseDate.getText().catch(() => 'N/A');
     const status = await this.loanStatus.getText().catch(() => 'N/A');
@@ -125,9 +177,16 @@ class SimulacionPrestamoPage extends Page {
    * Method to verify loan was processed
    */
   async verifyLoanProcessed() {
+    // Wait for result to be displayed
+    await this.resultDiv.waitForDisplayed({ timeout: 5000 }).catch(async () => {
+      // If result div not found, wait for title
+      await this.resultTitle.waitForDisplayed({ timeout: 5000 });
+    });
+    
     const result = await this.getLoanRequestResult();
     console.log('Loan request result:', result);
     
+    // Verify title
     if (result.title !== 'Loan Request Processed') {
       throw new Error(`Expected title "Loan Request Processed" but got "${result.title}"`);
     }

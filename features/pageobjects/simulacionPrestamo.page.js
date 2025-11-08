@@ -29,7 +29,7 @@ class SimulacionPrestamoPage extends Page {
   }
 
   get resultTitle() {
-    return $("//h1[@class='title']");
+    return $("//*[@id='requestLoanResult']/h1");
   }
 
   get loanProviderName() {

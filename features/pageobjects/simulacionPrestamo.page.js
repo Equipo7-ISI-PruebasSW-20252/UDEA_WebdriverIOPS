@@ -33,7 +33,7 @@ class SimulacionPrestamoPage extends Page {
   }
 
   get loanProviderName() {
-    return $("//*[@id='loanProviderName']");
+    return $("//*[@id='loanProviderName']"); 
   }
 
   get responseDate() {

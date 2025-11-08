@@ -51,8 +51,12 @@ class BillPayPage extends Page {
         return $('input[value="Send Payment"]');
     }
 
+    get successResultDiv() {
+    return $('#billpayResult');
+    }
+    
     get successMessage() {
-        return $('h1.title');
+        return $('#billpayResult h1.title');
     }
 
     get successDetailsMessage() {

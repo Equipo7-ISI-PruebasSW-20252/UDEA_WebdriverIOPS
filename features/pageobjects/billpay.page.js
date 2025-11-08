@@ -1,7 +1,9 @@
+import Page from './page.js';
+
 /**
  * Page Object para la funcionalidad Bill Pay de Parabank
  */
-class BillPayPage {
+class BillPayPage extends Page {
     /**
      * Selectores de elementos del formulario Bill Pay
      */
@@ -55,13 +57,6 @@ class BillPayPage {
 
     get accountMismatchError() {
         return $('#validationModel-verifyAccount-mismatch');
-    }
-
-    /**
-     * Navega a la página de Bill Pay
-     */
-    async navigateToBillPay() {
-        await browser.url('/parabank/billpay.htm');
     }
 
     /**
@@ -181,8 +176,12 @@ class BillPayPage {
      * @returns {Promise<boolean>}
      */
     async isSuccessMessageDisplayed() {
-        await this.successMessage.waitForDisplayed({ timeout: 5000 });
-        return await this.successMessage.isDisplayed();
+        try {
+            await this.successMessage.waitForDisplayed({ timeout: 5000 });
+            return await this.successMessage.isDisplayed();
+        } catch (error) {
+            return false;
+        }
     }
 
     /**
@@ -190,8 +189,12 @@ class BillPayPage {
      * @returns {Promise<boolean>}
      */
     async isAccountMismatchErrorDisplayed() {
-        await this.accountMismatchError.waitForDisplayed({ timeout: 3000 });
-        return await this.accountMismatchError.isDisplayed();
+        try {
+            await this.accountMismatchError.waitForDisplayed({ timeout: 3000 });
+            return await this.accountMismatchError.isDisplayed();
+        } catch (error) {
+            return false;
+        }
     }
 
     /**
@@ -211,6 +214,13 @@ class BillPayPage {
         await this.accountMismatchError.waitForDisplayed();
         return await this.accountMismatchError.getText();
     }
+
+    /**
+     * Sobrescribe el método open para navegar a la página de Bill Pay
+     */
+    open() {
+        return super.open('billpay.htm');
+    }
 }
 
-module.exports = new BillPayPage();
+export default new BillPayPage();

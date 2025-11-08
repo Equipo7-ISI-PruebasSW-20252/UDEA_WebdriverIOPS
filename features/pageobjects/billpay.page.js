@@ -52,7 +52,11 @@ class BillPayPage extends Page {
     }
 
     get successMessage() {
-        return $('h1*=Bill Payment Complete');
+        return $('h1.title');
+    }
+
+    get successDetailsMessage() {
+        return $('#billpayResult p');
     }
 
     get accountMismatchError() {
@@ -216,10 +220,16 @@ class BillPayPage extends Page {
     }
 
     /**
-     * Sobrescribe el método open para navegar a la página de Bill Pay
+     * Navega a la página de Bill Pay haciendo clic en el link del menú
      */
-    open() {
-        return super.open('billpay.htm');
+    async open() {
+        // Opción 1: Hacer clic en el link del menú
+        const billPayLink = await $('=Bill Pay');
+        await billPayLink.waitForDisplayed({ timeout: 10000 });
+        await billPayLink.click();
+        
+        // Esperar a que el formulario se cargue
+        await this.payeeNameInput.waitForDisplayed({ timeout: 10000 });
     }
 }
 

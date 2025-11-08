@@ -72,7 +72,7 @@ class SimulacionPrestamoPage extends Page {
     await this.inputLoanAmount.setValue(amount);
     
     // Fill in down payment
-    await this.inputDownPayment.setValue(downPayment);
+    await this.inputDownPayment.setValue(downPayment); 
     
     // Select account if provided
     if (accountId) {

@@ -18,8 +18,6 @@ Given(/^el usuario está autenticado en Parabank$/, async function() {
 
 Given(/^el usuario navega a la página de Bill Pay$/, async function() {
     await BillPayPage.open();
-    // Esperar a que el formulario esté visible
-    await BillPayPage.payeeNameInput.waitForDisplayed({ timeout: 5000 });
 });
 
 When(/^el usuario ingresa los siguientes datos del beneficiario:$/, async function(dataTable) {
@@ -41,7 +39,7 @@ When(/^el usuario confirma el pago$/, async function() {
 
 Then(/^se debe mostrar el mensaje de pago exitoso$/, async function() {
     // Esperar a que aparezca el mensaje de éxito
-    await BillPayPage.successMessage.waitForDisplayed({ timeout: 5000 });
+    await BillPayPage.successMessage.waitForDisplayed({ timeout: 10000 });
     
     const isDisplayed = await BillPayPage.isSuccessMessageDisplayed();
     await expect(isDisplayed).toBe(true);

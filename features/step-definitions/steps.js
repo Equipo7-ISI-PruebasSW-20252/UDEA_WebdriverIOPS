@@ -2,10 +2,12 @@ import { Given, When, Then } from "@wdio/cucumber-framework";
 
 import LoginPage from '../pageobjects/login.page.js';
 import CheckStatePage from '../pageobjects/checkState.page.js';
+import SimulacionPrestamoPage from '../pageobjects/simulacionPrestamo.page.js';
 
 const pages = {
   login: LoginPage,
   checkState: CheckStatePage,
+  loanRequest: SimulacionPrestamoPage,
 };
 
 let recordedBalance = null;
@@ -132,5 +134,31 @@ Then(/^I print all available accounts$/, async () => {
 When(/^I reset the recorded balance$/, async () => {
   recordedBalance = null;
   console.log('Recorded balance reset');
+});
+//*********************************************************************************************************************************************************
+
+//LOAN REQUEST
+
+// Fill in loan amount
+When(/^I fill in loan amount with "([^"]+)"$/, async (amount) => {
+  await SimulacionPrestamoPage.inputLoanAmount.waitForDisplayed({ timeout: 10000 });
+  await SimulacionPrestamoPage.inputLoanAmount.setValue(amount);
+});
+
+// Fill in down payment
+When(/^I fill in down payment with "([^"]+)"$/, async (downPayment) => {
+  await SimulacionPrestamoPage.inputDownPayment.waitForDisplayed({ timeout: 10000 });
+  await SimulacionPrestamoPage.inputDownPayment.setValue(downPayment);
+});
+
+// Submit loan request
+When(/^I submit the loan request$/, async () => {
+  await SimulacionPrestamoPage.submitLoanRequest();
+});
+
+// Verify loan request was processed
+Then(/^I should see loan request processed$/, async () => {
+  const result = await SimulacionPrestamoPage.verifyLoanProcessed();
+  await expect(result.title).toBe('Loan Request Processed');
 });
 //*********************************************************************************************************************************************************

@@ -1,6 +1,6 @@
-const { Given, When, Then } = require('@wdio/cucumber-framework');
+const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('chai');
-const BillPayPage = require('../pageobjects/BillPay.page');
+const BillPayPage = require('./pageobjects/BillPay.page');
 
 /**
  * Step Definitions para la funcionalidad Bill Pay

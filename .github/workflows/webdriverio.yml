@@ -1,27 +1,65 @@
 # .github/workflows/node-ci.yml
-
 name: Node.js CI
-
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
 jobs:
   build:
     runs-on: windows-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '16'
-
+          
       - name: Install dependencies
         run: npm install
-
+        
       - name: Run WebdriverIO tests
         run: npx wdio ./wdio.conf.js
+        continue-on-error: true
+        
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            allure-results/
+            reports/
+            test-results/
+            screenshots/
+          retention-days: 30
+          
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate allure-results --clean -o allure-report
+        continue-on-error: true
+        
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 30
+          
+      - name: Publish Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: WebdriverIO Test Results
+          path: 'test-results/*.xml'
+          reporter: java-junit
+          fail-on-error: false

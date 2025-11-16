@@ -328,4 +328,34 @@ export const config = {
     */
     // onReload: function(oldSessionId, newSessionId) {
     // }
+
+    // Reporters para generar reportes
+    reporters: [
+        'spec',
+        ['allure', {
+            outputDir: 'allure-results',
+            disableWebdriverStepsReporting: false,
+            disableWebdriverScreenshotsReporting: false,
+        }],
+        ['junit', {
+            outputDir: './test-results',
+            outputFileFormat: function(options) {
+                return `results-${options.cid}.xml`
+            }
+        }],
+        ['html-nice', {
+            outputDir: './reports/html-reports/',
+            filename: 'report.html',
+            reportTitle: 'Test Report',
+            showInBrowser: false,
+            useOnAfterCommandForScreenshot: false
+        }]
+    ],
+    
+    // Captura screenshots en caso de fallo
+    afterTest: async function(test, context, { error, result, duration, passed, retries }) {
+        if (!passed) {
+            await browser.takeScreenshot();
+        }
+    },
 }

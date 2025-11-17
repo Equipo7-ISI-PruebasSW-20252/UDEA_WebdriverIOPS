@@ -1,8 +1,14 @@
-Feature: ParaBank Loan Simulation Feature
+Feature: Loan Request - Solicitud de préstamos
+  Como usuario autenticado
+  Quiero solicitar un préstamo
+  Para obtener financiamiento
 
-  Scenario Outline: As a user, I can request a loan
+  Background:
     Given I am logged in with john and demo
     And I am on the loanRequest page
+
+  @loan-request @happy-path
+  Scenario Outline: Solicitar préstamo con diferentes montos
     When I fill in loan amount with "<loanAmount>"
     And I fill in down payment with "<downPayment>"
     And I submit the loan request
@@ -11,4 +17,3 @@ Feature: ParaBank Loan Simulation Feature
     Examples:
       | loanAmount | downPayment |
       | 1000       | 100         |
-

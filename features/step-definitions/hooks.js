@@ -6,7 +6,6 @@ import { After, Before } from "@wdio/cucumber-framework";
  */
 Before(async function() {
     console.log(`Iniciando escenario: ${this.pickle?.name || 'Sin nombre'}`);
-    await browser.deleteAllCookies();
     await browser.reloadSession();
 });
 
@@ -16,18 +15,17 @@ Before(async function() {
  */
 After(async function(scenario) {
     try {
-        // Capturar screenshot si el escenario falló
+        // Capturar screenshot solo si falló
         if (scenario.result?.status === 'FAILED') {
             const screenshot = await browser.takeScreenshot();
             this.attach(screenshot, 'image/png');
             console.log(`Escenario fallido: ${scenario.pickle?.name}`);
         }
-        
-        await browser.deleteAllCookies();
-        await browser.reloadSession();
     } catch (error) {
-        console.log('Error durante limpieza:', error.message);
+        console.error('Error durante limpieza:', error.message);
     } finally {
+        // reloadSession ya limpia cookies, no es necesario deleteAllCookies
+        await browser.reloadSession();
         console.log('Limpieza completada');
     }
 });

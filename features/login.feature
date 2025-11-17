@@ -1,11 +1,15 @@
-Feature: ParaBank Login Feature
+Feature: Login - Autenticación de usuarios
+  Como usuario del sistema
+  Quiero autenticarme en ParaBank
+  Para acceder a mis cuentas
 
-  Scenario Outline: As a user, I can log into the Parabank Accounts Service Page
+  @login @positive @negative
+  Scenario Outline: Autenticación con diferentes credenciales
     Given I am on the login page
     When I login with <username> and <password>
     Then I should see a text saying <message>
 
-    Examples: 
-      | username          | password | message           |
-      | invalidUsername   |          | Error!            |
-      | john              | demo     | Accounts Overview |
+    Examples:
+      | username        | password | message           |
+      | invalidUsername |          | Error!            |
+      | john            | demo     | Accounts Overview |

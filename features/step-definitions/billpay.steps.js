@@ -19,10 +19,8 @@ Given(/^el usuario está autenticado en Parabank$/, async function() {
     await LoginPage.open();
     await LoginPage.login(DEFAULT_CREDENTIALS.username, DEFAULT_CREDENTIALS.password);
     
-    // Verificar login exitoso
-    const titleElement = await $('.title');
-    await expect(titleElement).toBeExisting();
-    await expect(titleElement).toHaveTextContaining('Accounts Overview');
+    // Verificación simplificada - una sola comprobación con texto
+    await expect($('.title')).toHaveTextContaining('Accounts Overview');
 });
 
 /**
@@ -38,8 +36,7 @@ Given(/^el usuario navega a la página de Bill Pay$/, async function() {
  * Llena el formulario con datos del beneficiario
  */
 When(/^el usuario ingresa los siguientes datos del beneficiario:$/, async function(dataTable) {
-    const payeeData = dataTable.rowsHash();
-    await BillPayPage.fillPayeeInformation(payeeData);
+    await BillPayPage.fillPayeeInformation(dataTable.rowsHash());
 });
 
 /**
@@ -64,11 +61,8 @@ When(/^el usuario confirma el pago$/, async function() {
 Then(/^se debe mostrar el mensaje de pago exitoso$/, async function() {
     await BillPayPage.successMessage.waitForDisplayed({ timeout: 10000 });
     
-    const isDisplayed = await BillPayPage.isSuccessMessageDisplayed();
-    await expect(isDisplayed).toBe(true);
-    
-    const messageText = await BillPayPage.getSuccessMessageText();
-    await expect(messageText).toContain('Bill Payment Complete');
+    // Una sola verificación del contenido (ya implica que está displayed)
+    await expect(BillPayPage.successMessage).toHaveTextContaining('Bill Payment Complete');
 });
 
 /**
@@ -77,9 +71,7 @@ Then(/^se debe mostrar el mensaje de pago exitoso$/, async function() {
 Then(/^se debe mostrar el error de cuentas no coinciden$/, async function() {
     await BillPayPage.accountMismatchError.waitForDisplayed({ timeout: 5000 });
     
-    const isDisplayed = await BillPayPage.isAccountMismatchErrorDisplayed();
-    await expect(isDisplayed).toBe(true);
-    
+    // Una sola verificación - si está displayed y tiene texto, existe
     const errorText = await BillPayPage.getAccountMismatchErrorText();
     await expect(errorText.length).toBeGreaterThan(0);
 });

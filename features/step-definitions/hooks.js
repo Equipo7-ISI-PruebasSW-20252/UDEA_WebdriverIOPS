@@ -6,7 +6,13 @@ import { After, Before } from "@wdio/cucumber-framework";
  */
 Before(async function() {
     console.log(`Iniciando escenario: ${this.pickle?.name || 'Sin nombre'}`);
-    await browser.reloadSession();
+    
+    try {
+        await browser.deleteAllCookies();
+    } catch (error) {
+        // Si falla, intentar recargar sesión
+        await browser.reloadSession();
+    }
 });
 
 /**
@@ -21,11 +27,18 @@ After(async function(scenario) {
             this.attach(screenshot, 'image/png');
             console.log(`Escenario fallido: ${scenario.pickle?.name}`);
         }
+        
+        await browser.deleteAllCookies();
     } catch (error) {
         console.error('Error durante limpieza:', error.message);
+        
+        // Intentar recargar sesión como último recurso
+        try {
+            await browser.reloadSession();
+        } catch (reloadError) {
+            console.error('No se pudo recargar la sesión:', reloadError.message);
+        }
     } finally {
-        // reloadSession ya limpia cookies, no es necesario deleteAllCookies
-        await browser.reloadSession();
         console.log('Limpieza completada');
     }
 });

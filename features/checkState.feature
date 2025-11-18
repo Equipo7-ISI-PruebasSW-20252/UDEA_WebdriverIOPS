@@ -20,7 +20,7 @@ Feature: Account Overview - Consultar estado de cuentas
 
     Examples:
       | accountId | accountType | balance |
-      | 13011     | CHECKING    | $100.00 |
+      | 13788     | CHECKING    | $100.00 |
 
   #@account-overview @navigation
   #Scenario: Seleccionar otra cuenta actualiza el panel de detalles

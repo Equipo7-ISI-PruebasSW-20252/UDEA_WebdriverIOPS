@@ -17,8 +17,8 @@ Feature: Bill Pay - Realizar pagos a beneficiarios
       | State            | Antioquia               |
       | Zip Code         | 050001                  |
       | Phone            | 3001234567              |
-      | Account          | 12345                   |
-      | Verify Account   | 12345                   |
+      | Account          | 13566                   |
+      | Verify Account   | 13566                   |
       | Amount           | 100.00                  |
     And el usuario selecciona una cuenta de origen
     And el usuario confirma el pago

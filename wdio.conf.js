@@ -336,6 +336,9 @@ export const config = {
             outputDir: 'allure-results',
             disableWebdriverStepsReporting: false,
             disableWebdriverScreenshotsReporting: false,
+            useCucumberStepReporter: true,
+            disableMochaHooks: true,  // ← Ignora errores en hooks
+            addConsoleLogs: false      // ← Evita logs innecesarios
         }],
         ['junit', {
             outputDir: './test-results',

@@ -358,15 +358,4 @@ export const config = {
             await browser.takeScreenshot();
         }
     },
-
-    afterScenario: async function () {
-        // Limpiar DESPUÉS de cada escenario
-        await browser.deleteAllCookies();
-        await browser.execute(() => {
-            try {
-                localStorage.clear();
-                sessionStorage.clear();
-            } catch (e) {}
-        });
-    }
 }

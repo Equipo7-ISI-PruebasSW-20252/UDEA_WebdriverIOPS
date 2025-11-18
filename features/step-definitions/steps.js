@@ -3,11 +3,13 @@ import { Given, When, Then } from "@wdio/cucumber-framework";
 import LoginPage from '../pageobjects/login.page.js';
 import CheckStatePage from '../pageobjects/checkState.page.js';
 import SimulacionPrestamoPage from '../pageobjects/simulacionPrestamo.page.js';
+import TransferPage from "../pageobjects/transfer.page.js";
 
 const pages = {
   login: LoginPage,
   checkState: CheckStatePage,
   loanRequest: SimulacionPrestamoPage,
+  transfer: TransferPage
 };
 
 let recordedBalance = null;
@@ -50,6 +52,25 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 });
 
 //*********************************************************************************************************************************************************
+
+// TRANSFER
+When(
+    /^I write the (.*) to transfer from the account (.*) to the account (.*) and press transfer$/,
+    async (amount, fromAccount, toAccount) => {
+        await TransferPage.transfer(amount, fromAccount, toAccount);
+    }
+);
+
+Then(/^I see (.*)$/, async (message) => {
+    const selector = `//h1[normalize-space()='${message}']`;
+    const msgElement = $(selector);
+
+    await expect(msgElement).toBeExisting();
+    await expect(msgElement).toHaveTextContaining(message);
+
+    await TransferPage.logout();
+});
+
 
 //CHECK ACCOUNT STATE
 // Ver que la lista de cuentas aparece

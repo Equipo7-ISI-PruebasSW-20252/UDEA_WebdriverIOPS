@@ -11,5 +11,5 @@ Feature: Transferencias en Parabank
 
   Examples:
     | amount | fromAccount | toAccount | message              |
-    | 1      | 13788       | 14454     | Transfer Complete!   |
-    |        | 13677       | 13566     | Error!               |
+    | 1      | 14010       | 14232     | Transfer Complete!   |
+    |        | 14010       | 14232     | Error!               |

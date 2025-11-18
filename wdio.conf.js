@@ -359,30 +359,14 @@ export const config = {
         }
     },
 
-    beforeScenario: async function (world) {
-        // Navegar a la página principal y hacer logout antes de cada escenario
-        await browser.url('https://parabank.parasoft.com/parabank/index.htm');
-        
-        // Verificar si existe el link de logout
-        const logoutLink = await $('a[href*="logout"]');
-        const isLoggedIn = await logoutLink.isExisting();
-        
-        if (isLoggedIn) {
-            await logoutLink.click();
-            await browser.pause(500);
-        }
-        
-        // Limpiar cookies y storage
+    afterScenario: async function () {
+        // Limpiar DESPUÉS de cada escenario
         await browser.deleteAllCookies();
         await browser.execute(() => {
-            localStorage.clear();
-            sessionStorage.clear();
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {}
         });
-    },
-    
-    // Opcional pero recomendado
-    afterScenario: async function (world) {
-        // Navegar a página en blanco para limpiar estado
-        await browser.url('about:blank');
-    },
+    }
 }

@@ -5,7 +5,6 @@ import { After } from '@wdio/cucumber-framework';
  */
 After(async function (scenario) {
     try {
-        // Solo lo esencial sin lanzar errores
         await browser.deleteAllCookies().catch(() => {});
         await browser.execute(() => {
             localStorage?.clear();

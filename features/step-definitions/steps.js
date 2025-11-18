@@ -53,24 +53,6 @@ Then(/^I should see a text saying (.*)$/, async (message) => {
 
 //*********************************************************************************************************************************************************
 
-// TRANSFER
-When(
-    /^I write the (.*) to transfer from the account (.*) to the account (.*) and press transfer$/,
-    async (amount, fromAccount, toAccount) => {
-        await TransferPage.transfer(amount, fromAccount, toAccount);
-    }
-);
-
-Then(/^I see (.*)$/, async (message) => {
-    const selector = `//h1[normalize-space()='${message}']`;
-    const msgElement = $(selector);
-
-    await expect(msgElement).toBeExisting();
-    await expect(msgElement).toHaveTextContaining(message);
-
-    await TransferPage.logout();
-});
-
 
 //CHECK ACCOUNT STATE
 // Ver que la lista de cuentas aparece
@@ -182,4 +164,22 @@ When(/^I submit the loan request$/, async () => {
 Then(/^I should see loan request processed$/, async () => {
   const result = await SimulacionPrestamoPage.verifyLoanProcessed();
   await expect(result.title).toBe('Loan Request Processed');
+});
+
+// TRANSFER
+When(
+    /^I write the (.*) to transfer from the account (.*) to the account (.*) and press transfer$/,
+    async (amount, fromAccount, toAccount) => {
+        await TransferPage.transfer(amount, fromAccount, toAccount);
+    }
+);
+
+Then(/^I see (.*)$/, async (message) => {
+    const selector = `//h1[normalize-space()='${message}']`;
+    const msgElement = $(selector);
+
+    await expect(msgElement).toBeExisting();
+    await expect(msgElement).toHaveTextContaining(message);
+
+    await TransferPage.logout();
 });

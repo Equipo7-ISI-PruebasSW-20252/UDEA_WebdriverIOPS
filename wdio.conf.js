@@ -358,4 +358,31 @@ export const config = {
             await browser.takeScreenshot();
         }
     },
+
+    beforeScenario: async function (world) {
+        // Navegar a la página principal y hacer logout antes de cada escenario
+        await browser.url('https://parabank.parasoft.com/parabank/index.htm');
+        
+        // Verificar si existe el link de logout
+        const logoutLink = await $('a[href*="logout"]');
+        const isLoggedIn = await logoutLink.isExisting();
+        
+        if (isLoggedIn) {
+            await logoutLink.click();
+            await browser.pause(500);
+        }
+        
+        // Limpiar cookies y storage
+        await browser.deleteAllCookies();
+        await browser.execute(() => {
+            localStorage.clear();
+            sessionStorage.clear();
+        });
+    },
+    
+    // Opcional pero recomendado
+    afterScenario: async function (world) {
+        // Navegar a página en blanco para limpiar estado
+        await browser.url('about:blank');
+    },
 }
